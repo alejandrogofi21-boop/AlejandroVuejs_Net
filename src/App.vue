@@ -1,3 +1,3 @@
-<script setup> import pelicula from './components/pelicula.vue' </script> 
+<script setup> import Peliculas from './components/Peliculas.vue' </script> 
 
-<template> <pelicula /> </template>
+<template> <Peliculas /> </template>
