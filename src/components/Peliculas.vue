@@ -1,10 +1,16 @@
 <script setup>
+import { onMounted } from 'vue'
 import SelectorUsuario from './SelectorUsuario.vue'
 import BarraFiltro from './BarraFiltro.vue'
 import TarjetaPelicula from './TarjetaPelicula.vue'
 import { usePeliculasStore } from '../stores/peliculas'
 
 const peliculasStore = usePeliculasStore()
+
+onMounted(() => {
+  peliculasStore.cargarPeliculas()
+})
+
 </script>
 
 <template>
@@ -31,7 +37,7 @@ const peliculasStore = usePeliculasStore()
       <template #usuario-actual="{ usuario }">
         <div class="tarjeta-usuario-actual" v-if="usuario">
           👤 Viendo como <strong>{{ usuario.nombre }}</strong>
-          (le gusta: {{ usuario.generoFavorito }})
+          (le gusta: {{ usuario.directorFavorito }})
         </div>
       </template>
     </SelectorUsuario>
@@ -40,8 +46,13 @@ const peliculasStore = usePeliculasStore()
       :filtro-actual="peliculasStore.filtro"
       @cambiar-filtro="peliculasStore.cambiarFiltro"
     />
+    <p v-if="peliculasStore.cargando">Cargando películas...</p>
 
-    <div class="lista-peliculas">
+    <!-- Estado: ERROR -->
+    <p v-else-if="peliculasStore.error" class="error">{{ peliculasStore.error }}</p>
+
+    <!-- Estado: ÉXITO -->
+    <div v-else class="lista-peliculas">
       <TarjetaPelicula
         v-for="pelicula in peliculasStore.peliculasFiltradas"
         :key="pelicula.id"

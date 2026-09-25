@@ -9,7 +9,7 @@ const peliculasStore = usePeliculasStore()
 
 const pelicula = ref(null)
 
-// watch + immediate: true, en vez de onMounted (más robusto, como vimos)
+
 watch(
   () => route.params.id,
   (nuevoId) => {
@@ -29,7 +29,7 @@ function volver() {
     <button @click="volver">← Volver</button>
     <img :src="pelicula.imagen" :alt="pelicula.titulo" />
     <h1>{{ pelicula.titulo }}</h1>
-    <p class="genero">{{ pelicula.genero }}</p>
+    <p class="director">{{ pelicula.director }}</p>
   </div>
   <div v-else>
     <p>Película no encontrada</p>
@@ -47,7 +47,7 @@ function volver() {
   width: 100%;
   border-radius: 8px;
 }
-.genero {
+.director {
   color: gray;
 }
 button {
