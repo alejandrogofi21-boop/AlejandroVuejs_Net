@@ -1,3 +1,6 @@
-<script setup> import Peliculas from './components/Peliculas.vue' </script> 
+<script setup>
+</script>
 
-<template> <Peliculas /> </template>
+<template>
+  <router-view></router-view>
+</template>

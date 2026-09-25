@@ -1,14 +1,25 @@
 <script setup>
-defineProps({
+
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const props = defineProps({
   pelicula: {
     type: Object,
     required: true
   }
 })
+
+
+function irADetalle() {
+  router.push(`/peliculas/${props.pelicula.id}`)
+}
+
 </script>
 
 <template>
-  <div class="tarjeta-pelicula">
+  <div class="tarjeta-pelicula" @click="irADetalle">
     <img :src="pelicula.imagen" :alt="pelicula.titulo" />
     <h3>{{ pelicula.titulo }}</h3>
     <p class="genero">{{ pelicula.genero }}</p>
