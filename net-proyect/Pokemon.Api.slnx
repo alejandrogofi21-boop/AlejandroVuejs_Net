@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Pokemon.Catalogos/Pokemon.Catalogos.csproj" Id="5f1dc19d-da19-464e-aa2f-69a21fcd0072" />
+  <Project Path="Pokemon.Gateway/Pokemon.Gateway.csproj" Id="4afe4cf5-6207-41f2-b3b9-e08840009e2c" />
+  <Project Path="WebApplication1/WebApplication1.csproj" />
+</Solution>

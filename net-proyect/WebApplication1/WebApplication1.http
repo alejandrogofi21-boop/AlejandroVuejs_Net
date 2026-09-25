@@ -1,0 +1,21 @@
+@WebApplication1_HostAddress = http://localhost:5172
+
+### Listar las generaciones disponibles
+GET {{WebApplication1_HostAddress}}/api/pokemon/generaciones
+Accept: application/json
+
+###
+
+### Listar todos los pokemon
+GET {{WebApplication1_HostAddress}}/api/pokemon
+Accept: application/json
+
+###
+
+### Filtrar pokemon por generacion
+GET {{WebApplication1_HostAddress}}/api/pokemon?generacion=Gen I
+Accept: application/json
+
+
+
+###

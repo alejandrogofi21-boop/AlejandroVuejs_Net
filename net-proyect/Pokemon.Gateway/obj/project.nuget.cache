@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "2s7qP99Sd5I=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Alejandro\\Desktop\\Pokemon.Api\\Pokemon.Gateway\\Pokemon.Gateway.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Alejandro\\.nuget\\packages\\system.io.hashing\\8.0.0\\system.io.hashing.8.0.0.nupkg.sha512",
+    "C:\\Users\\Alejandro\\.nuget\\packages\\yarp.reverseproxy\\2.3.0\\yarp.reverseproxy.2.3.0.nupkg.sha512"
+  ],
+  "logs": []
+}

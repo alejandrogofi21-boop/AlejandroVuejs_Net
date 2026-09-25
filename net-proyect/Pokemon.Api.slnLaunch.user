@@ -1,0 +1,19 @@
+[
+  {
+    "Name": "Nuevo perfil",
+    "Projects": [
+      {
+        "Path": "WebApplication1\\WebApplication1.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Pokemon.Catalogos\\Pokemon.Catalogos.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Pokemon.Gateway\\Pokemon.Gateway.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

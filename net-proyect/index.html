@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Pokedex por Generacion</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 40px auto;
+    background: #f4f4f4;
+    color: #222;
+  }
+  h1 { text-align: center; }
+
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+  }
+  .tab-btn {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 15px;
+    color: #666;
+    border-bottom: 3px solid transparent;
+  }
+  .tab-btn.activa {
+    color: #2d3e50;
+    font-weight: bold;
+    border-bottom: 3px solid #2d3e50;
+  }
+
+  .panel { display: none; }
+  .panel.activa { display: block; }
+
+  .controles {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  select, button.accion {
+    padding: 8px 12px;
+    font-size: 15px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+  }
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    font-size: 14px;
+  }
+  th { background: #2d3e50; color: white; }
+  tr:hover { background: #f0f8ff; }
+  .badge {
+    display: inline-block;
+    background: #e0e0e0;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin: 1px;
+    font-size: 12px;
+  }
+  #estadoPokemon, #estadoCatalogos { text-align: center; color: #888; margin-top: 10px; }
+
+  .catalogos-columnas {
+    display: flex;
+    gap: 20px;
+  }
+  .catalogos-columnas > div { flex: 1; }
+  .catalogos-columnas h2 { font-size: 16px; text-align: center; }
+</style>
+</head>
+<body>
+
+  <h1>Pokedex por Generacion</h1>
+
+  <!-- Pestañas -->
+  <div class="tabs">
+    <button class="tab-btn activa" data-tab="pokemon">Pokemon</button>
+    <button class="tab-btn" data-tab="catalogos">Catalogos</button>
+  </div>
+
+  <!-- Panel Pokemon -->
+  <section id="panelPokemon" class="panel activa">
+    <div class="controles">
+      <select id="selectGeneracion">
+        <option value="">-- Elige una generacion --</option>
+      </select>
+      <button class="accion" id="btnTodos">Ver todos</button>
+    </div>
+
+    <p id="estadoPokemon"></p>
+
+    <table id="tablaPokemon">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Tipos</th>
+          <th>Habilidad</th>
+          <th>Naturaleza</th>
+          <th>Objeto</th>
+          <th>Rol</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoTablaPokemon"></tbody>
+    </table>
+  </section>
+
+  <!-- Panel Catalogos -->
+  <section id="panelCatalogos" class="panel">
+    <p id="estadoCatalogos"></p>
+    <div class="catalogos-columnas">
+      <div>
+        <h2>Tipos</h2>
+        <table>
+          <thead><tr><th>#</th><th>Nombre</th></tr></thead>
+          <tbody id="cuerpoTablaTipos"></tbody>
+        </table>
+      </div>
+      <div>
+        <h2>Movimientos</h2>
+        <table>
+          <thead><tr><th>#</th><th>Nombre</th></tr></thead>
+          <tbody id="cuerpoTablaMovimientos"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+<script>
+  // Todo pasa por el Gateway (YARP) en el puerto 5000.
+  // El frontend ya no conoce los puertos 5172/5173 de cada microservicio.
+  const GATEWAY_BASE = "http://localhost:5000/api";
+
+  // ---------- PESTAÑAS ----------
+  const botonesTab = document.querySelectorAll(".tab-btn");
+  const paneles = {
+    pokemon: document.getElementById("panelPokemon"),
+    catalogos: document.getElementById("panelCatalogos")
+  };
+  let catalogosCargados = false;
+
+  botonesTab.forEach(boton => {
+    boton.addEventListener("click", () => {
+      botonesTab.forEach(b => b.classList.remove("activa"));
+      boton.classList.add("activa");
+
+      Object.values(paneles).forEach(p => p.classList.remove("activa"));
+      paneles[boton.dataset.tab].classList.add("activa");
+
+      // Los catalogos se piden solo la primera vez que se abre esa pestaña
+      if (boton.dataset.tab === "catalogos" && !catalogosCargados) {
+        cargarCatalogos();
+        catalogosCargados = true;
+      }
+    });
+  });
+
+  // ---------- PESTAÑA POKEMON ----------
+  const selectGeneracion = document.getElementById("selectGeneracion");
+  const cuerpoTablaPokemon = document.getElementById("cuerpoTablaPokemon");
+  const estadoPokemon = document.getElementById("estadoPokemon");
+  const btnTodos = document.getElementById("btnTodos");
+
+  async function cargarGeneraciones() {
+    try {
+      const respuesta = await fetch(`${GATEWAY_BASE}/pokemon/generaciones`);
+      if (!respuesta.ok) throw new Error("Error al pedir generaciones");
+      const generaciones = await respuesta.json();
+
+      generaciones.forEach(g => {
+        const opcion = document.createElement("option");
+        opcion.value = g;
+        opcion.textContent = g;
+        selectGeneracion.appendChild(opcion);
+      });
+    } catch (error) {
+      estadoPokemon.textContent = "No se pudo conectar con el Gateway (puerto 5000). ¿Estan corriendo los 3 servicios?";
+      console.error(error);
+    }
+  }
+
+  async function cargarPokemon(generacion) {
+    estadoPokemon.textContent = "Cargando...";
+    cuerpoTablaPokemon.innerHTML = "";
+
+    const url = generacion
+      ? `${GATEWAY_BASE}/pokemon?generacion=${encodeURIComponent(generacion)}`
+      : `${GATEWAY_BASE}/pokemon`;
+
+    try {
+      const respuesta = await fetch(url);
+      if (!respuesta.ok) throw new Error("Error al pedir pokemon");
+      const pokemones = await respuesta.json();
+
+      pokemones.forEach(p => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${p.nombre}</td>
+          <td>${p.tipos.map(t => `<span class="badge">${t}</span>`).join(" ")}</td>
+          <td>${p.habilidad ?? "-"}</td>
+          <td>${p.naturaleza ?? "-"}</td>
+          <td>${p.objeto ?? "-"}</td>
+          <td>${p.rol ?? "-"}</td>
+        `;
+        cuerpoTablaPokemon.appendChild(fila);
+      });
+
+      estadoPokemon.textContent = `${pokemones.length} pokemon encontrados`;
+    } catch (error) {
+      estadoPokemon.textContent = "No se pudo conectar con el Gateway (puerto 5000).";
+      console.error(error);
+    }
+  }
+
+  selectGeneracion.addEventListener("change", () => {
+    cargarPokemon(selectGeneracion.value);
+  });
+
+  btnTodos.addEventListener("click", () => {
+    selectGeneracion.value = "";
+    cargarPokemon(null);
+  });
+
+  // ---------- PESTAÑA CATALOGOS ----------
+  const estadoCatalogos = document.getElementById("estadoCatalogos");
+  const cuerpoTablaTipos = document.getElementById("cuerpoTablaTipos");
+  const cuerpoTablaMovimientos = document.getElementById("cuerpoTablaMovimientos");
+
+  async function cargarCatalogos() {
+    estadoCatalogos.textContent = "Cargando catalogos...";
+
+    try {
+      // Dos peticiones en paralelo: una a cada microservicio, ambas via el Gateway
+      const [respTipos, respMovimientos] = await Promise.all([
+        fetch(`${GATEWAY_BASE}/tipos`),
+        fetch(`${GATEWAY_BASE}/movimientos`)
+      ]);
+
+      if (!respTipos.ok || !respMovimientos.ok) {
+        throw new Error("Error al pedir catalogos");
+      }
+
+      const tipos = await respTipos.json();
+      const movimientos = await respMovimientos.json();
+
+      cuerpoTablaTipos.innerHTML = tipos.map(t => `
+        <tr><td>${t.id}</td><td>${t.nombre}</td></tr>
+      `).join("");
+
+      cuerpoTablaMovimientos.innerHTML = movimientos.map(m => `
+        <tr><td>${m.id}</td><td>${m.nombre}</td></tr>
+      `).join("");
+
+      estadoCatalogos.textContent = `${tipos.length} tipos, ${movimientos.length} movimientos`;
+    } catch (error) {
+      estadoCatalogos.textContent = "No se pudo conectar con el Gateway (puerto 5000).";
+      console.error(error);
+    }
+  }
+
+  // Arranque
+  cargarGeneraciones();
+  cargarPokemon(null);
+</script>
+
+</body>
+</html>
